@@ -429,7 +429,7 @@
 
         <!-- 計算条件変更（段階別歩合） -->
         <div class="param-section hidden" id="section-params-tiered">
-          <div class="param-section-desc">変更する項目にチェック。未チェックはデフォルト値を使用。</div>
+          <div class="param-section-desc">変更する項目にチェック。未チェックはデフォルト値を使用。<br>※ 売上帯（下限・上限）は単月では変更できません。</div>
 
           <div class="param-row">
             <input type="checkbox" onchange="toggleParam(this, 'fixed-t')">
@@ -467,17 +467,53 @@
             </div>
           </div>
 
+          <!-- 段階別歩合率 -->
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e8e8e8;">
+            <div style="font-size: 11px; color: #888; font-weight: 600; margin-bottom: 6px;">段階別歩合率</div>
+
+            <div class="param-row">
+              <input type="checkbox" onchange="toggleParam(this, 'tier1')">
+              <div class="param-name">1段目</div>
+              <div class="param-default" style="font-size:10px; color:#bbb;">0 〜 &yen;3,000,000</div>
+              <div class="param-input disabled" id="param-tier1">
+                <div class="input-pct">
+                  <input type="text" value="0" disabled>
+                  <span class="pct-suffix">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="param-row">
+              <input type="checkbox" onchange="toggleParam(this, 'tier2')">
+              <div class="param-name">2段目</div>
+              <div class="param-default" style="font-size:10px; color:#bbb;">&yen;3,000,000 〜 &yen;5,000,000</div>
+              <div class="param-input disabled" id="param-tier2">
+                <div class="input-pct">
+                  <input type="text" value="10" disabled>
+                  <span class="pct-suffix">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="param-row">
+              <input type="checkbox" onchange="toggleParam(this, 'tier3')">
+              <div class="param-name">3段目</div>
+              <div class="param-default" style="font-size:10px; color:#bbb;">&yen;5,000,000 〜</div>
+              <div class="param-input disabled" id="param-tier3">
+                <div class="input-pct">
+                  <input type="text" value="8" disabled>
+                  <span class="pct-suffix">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="calc-preview">
             <div class="preview-label">この月の予測計算結果（売上予算 &yen;5,000,000 で試算）</div>
             <div class="preview-value">&yen;552,000</div>
             <div class="preview-note">
-              内訳: &yen;352,000 + 歩合合計 &yen;200,000（3段階計算）
+              内訳: &yen;352,000 + 歩合合計 &yen;200,000（1段目 &yen;0 + 2段目 &yen;200,000 + 3段目 &yen;0）
             </div>
-          </div>
-
-          <div class="rent-link-box">
-            段階別の歩合率・売上帯を月別に変更する場合は、賃料設定画面の「期間別上書き設定」から行ってください。<br>
-            <a href="/store/settings/rent" target="_blank">店舗情報 &gt; 賃料設定画面を開く &rarr;</a>
           </div>
         </div>
 
