@@ -216,6 +216,37 @@
   .section-divider { border: none; border-top: 1px solid #f0f0f0; margin: 0; }
 
   .hidden { display: none !important; }
+
+  /* 賃料体系切り替え */
+  .rent-type-switch {
+    display: flex; gap: 6px; margin-bottom: 12px; align-items: center;
+    font-size: 11px; color: #888;
+  }
+  .rent-type-switch select {
+    padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px;
+    font-size: 11px; color: #555; background: #fff;
+  }
+
+  /* 誘導リンク */
+  .rent-link-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #fff9f0;
+    border: 1px solid #f0e0c8;
+    border-radius: 6px;
+    font-size: 11px;
+    color: #8a6d3b;
+    line-height: 1.6;
+  }
+  .rent-link-box a {
+    color: #4ecdc4;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .rent-link-box a:hover {
+    text-decoration: underline;
+    color: #3dbdb4;
+  }
 </style>
 </head>
 <body>
@@ -268,9 +299,24 @@
       <!-- 上書きエリア（初期非表示） -->
       <div class="rent-override-area hidden" id="rent-override">
 
-        <div class="rent-info-bar">
+        <!-- デモ用：賃料体系切り替え -->
+        <div class="rent-type-switch">
+          <span>デモ切替:</span>
+          <select onchange="switchRentType(this.value)">
+            <option value="variable" selected>変動賃料</option>
+            <option value="tiered">段階別歩合</option>
+          </select>
+        </div>
+
+        <!-- 変動賃料の情報バー -->
+        <div class="rent-info-bar" id="info-variable">
           <span class="ii">i</span>
           現在の設定: <strong>&nbsp;変動賃料 / 合算&nbsp;</strong> | デフォルト計算額: <strong>&nbsp;&yen;452,000</strong>（売上予算 &yen;5,000,000）
+        </div>
+        <!-- 段階別歩合の情報バー -->
+        <div class="rent-info-bar hidden" id="info-tiered">
+          <span class="ii">i</span>
+          現在の設定: <strong>&nbsp;段階別歩合 / 合算（3段階）&nbsp;</strong> | デフォルト計算額: <strong>&nbsp;&yen;552,000</strong>（売上予算 &yen;5,000,000）
         </div>
 
         <div class="rent-radio-group">
@@ -307,7 +353,7 @@
           </div>
         </div>
 
-        <!-- 計算条件変更 -->
+        <!-- 計算条件変更（変動賃料） -->
         <div class="param-section hidden" id="section-params">
           <div class="param-section-desc">変更する項目にチェック。未チェックはデフォルト値を使用。</div>
 
@@ -380,6 +426,61 @@
             </div>
           </div>
         </div>
+
+        <!-- 計算条件変更（段階別歩合） -->
+        <div class="param-section hidden" id="section-params-tiered">
+          <div class="param-section-desc">変更する項目にチェック。未チェックはデフォルト値を使用。</div>
+
+          <div class="param-row">
+            <input type="checkbox" onchange="toggleParam(this, 'fixed-t')">
+            <div class="param-name">固定賃料</div>
+            <div class="param-default">初期値: &yen;352,000</div>
+            <div class="param-input disabled" id="param-fixed-t">
+              <div class="input-yen">
+                <span class="yen-prefix">&yen;</span>
+                <input type="text" value="352,000" disabled>
+              </div>
+            </div>
+          </div>
+
+          <div class="param-row">
+            <input type="checkbox" onchange="toggleParam(this, 'srate-t')">
+            <div class="param-name">売上歩合対象率</div>
+            <div class="param-default">初期値: 100%</div>
+            <div class="param-input disabled" id="param-srate-t">
+              <div class="input-pct">
+                <input type="text" value="100" disabled>
+                <span class="pct-suffix">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="param-row">
+            <input type="checkbox" onchange="toggleParam(this, 'mingua-t')">
+            <div class="param-name">最低保証額</div>
+            <div class="param-default">初期値: &yen;200,000</div>
+            <div class="param-input disabled" id="param-mingua-t">
+              <div class="input-yen">
+                <span class="yen-prefix">&yen;</span>
+                <input type="text" value="200,000" disabled>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-preview">
+            <div class="preview-label">この月の予測計算結果（売上予算 &yen;5,000,000 で試算）</div>
+            <div class="preview-value">&yen;552,000</div>
+            <div class="preview-note">
+              内訳: &yen;352,000 + 歩合合計 &yen;200,000（3段階計算）
+            </div>
+          </div>
+
+          <div class="rent-link-box">
+            段階別の歩合率・売上帯を月別に変更する場合は、賃料設定画面の「期間別上書き設定」から行ってください。<br>
+            <a href="/store/settings/rent" target="_blank">店舗情報 &gt; 賃料設定画面を開く &rarr;</a>
+          </div>
+        </div>
+
       </div>
 
       <hr class="section-divider">
@@ -442,6 +543,7 @@
 
 <script>
 let overrideOpen = false;
+let currentRentType = 'variable';
 
 function toggleOverride() {
   overrideOpen = !overrideOpen;
@@ -457,13 +559,28 @@ function toggleOverride() {
   }
 }
 
+function switchRentType(type) {
+  currentRentType = type;
+  document.getElementById('info-variable').classList.toggle('hidden', type !== 'variable');
+  document.getElementById('info-tiered').classList.toggle('hidden', type !== 'tiered');
+  // ラジオをdirectにリセット
+  switchMode('direct');
+}
+
 function switchMode(mode) {
   document.getElementById('radio-direct').classList.toggle('active', mode === 'direct');
   document.getElementById('radio-params').classList.toggle('active', mode === 'params');
   document.getElementById('radio-direct').querySelector('input').checked = mode === 'direct';
   document.getElementById('radio-params').querySelector('input').checked = mode === 'params';
+
   document.getElementById('section-direct').classList.toggle('hidden', mode !== 'direct');
-  document.getElementById('section-params').classList.toggle('hidden', mode !== 'params');
+
+  // 変動賃料パラメータ
+  document.getElementById('section-params').classList.toggle('hidden',
+    !(mode === 'params' && currentRentType === 'variable'));
+  // 段階別歩合パラメータ
+  document.getElementById('section-params-tiered').classList.toggle('hidden',
+    !(mode === 'params' && currentRentType === 'tiered'));
 }
 
 function toggleParam(checkbox, paramId) {
